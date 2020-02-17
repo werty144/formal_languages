@@ -2,8 +2,8 @@ language: python
 python:
   - "3.6"
 
-[pytest]
-testpaths = test
+install:
+  - pip3 install rdflib 
 # command to run tests
 script:
-  - pytest
+  - python3 test/RDF_tests.py
