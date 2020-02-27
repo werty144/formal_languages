@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/werty144/formal_languages.svg?branch=master)](https://travis-ci.org/werty144/formal_languages)
+[![Build Status](https://travis-ci.com/werty144/formal_languages.svg?branch=master)](https://travis-ci.com/werty144/formal_languages)
 # formal_languages
 Build project
 ```
