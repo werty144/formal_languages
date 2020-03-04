@@ -6,4 +6,5 @@ install:
   - pip3 install rdflib 
 # command to run tests
 script:
-  - python3 test/RDF_tests.py
+  - python3 test/*
+
