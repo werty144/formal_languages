@@ -8,4 +8,6 @@ def regex_to_minimal_dfa(regex_str):
 
 
 def minimal_dfa_and_nfa_intersection(dfa, nfa):
-    return dfa.to_regex().to_epsilon_nfa().get_intersection(nfa.to_regex().to_epsilon_nfa()).to_deterministic()
+    enfa1 = dfa.to_regex().to_epsilon_nfa()
+    enfa2 = nfa.to_regex().to_epsilon_nfa()
+    return enfa1.get_intersection(enfa2).to_deterministic()
