@@ -77,9 +77,7 @@ class TestDFA(unittest.TestCase):
         nfa.add_transition(state1, symb_d, state3)
         nfa.add_transition(state1, symb_b, state4)
 
-        intersection_fa = minimal_dfa_and_nfa_intersection(dfa, nfa)
-
-        self.assertTrue(intersection_fa.is_deterministic())
+        intersection_fa = dfa.get_intersection(nfa)
 
         self.assertTrue(dfa.accepts([symb_a, symb_a, symb_b]))
         self.assertTrue(nfa.accepts([symb_a, symb_a, symb_b]))
