@@ -3,8 +3,9 @@ python:
   - "3.6"
 
 install:
-  - pip3 install rdflib 
+  - pip3 install rdflib
+  - pip3 install pyformlang
 # command to run tests
 script:
-  - python3 test/*
+  - python3 -m unittest discover -s test -p '*_test.py'
 
