@@ -34,10 +34,13 @@ class TestRDFConsole(unittest.TestCase):
         sys.stdout = captured_output
         rdfci.load_local_rdf_file([filename])
         rdfci.show_edge_labels([])
-        self.assertEqual(captured_output.getvalue(),
-                         "http://example.com/says\n" +
-                         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type\n"
-                         )
+        self.assertTrue(captured_output.getvalue() ==
+                        "http://example.com/says\n" +
+                        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type\n" or
+                        captured_output.getvalue() ==
+                        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type\n" +
+                        "http://example.com/says\n"
+                        )
 
         captured_output = StringIO()
         sys.stdout = captured_output
