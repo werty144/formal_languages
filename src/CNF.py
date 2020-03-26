@@ -91,7 +91,7 @@ class CFGrammar:
                 self.add_rule(nonterminal, [expr[0]])
 
         was_eps_rules = False
-        for nonterminal, expr in self.rules:
+        for nonterminal, expr in self.rules.copy():
             if expr == ['eps']:
                 was_eps_rules = True
                 self.rules.remove((nonterminal, expr))
