@@ -98,6 +98,9 @@ class TestCNF(unittest.TestCase):
         my_grammar = CFGrammar(new_rules)
         for nonterminal, expr in my_grammar.rules:
             self.assertLessEqual(len(expr), 2)
+            self.assertFalse(my_grammar.start_nonterminal in expr)
+            if expr == ['eps']:
+                self.assertTrue(nonterminal == my_grammar.start_nonterminal)
             if len(expr) == 1:
                 self.assertTrue(expr[0] in my_grammar.terminals)
             if len(expr) == 2:
@@ -106,22 +109,23 @@ class TestCNF(unittest.TestCase):
     def test_correct_bracket_sequence_example(self):
         my_grammar = CFGrammar(cbs_rules)
         my_grammar.to_cnf()
-        self.assertEqual(my_grammar.start_nonterminal, 'A2')
+        self.assertEqual(my_grammar.start_nonterminal, 'S')
         sorted_rules = my_grammar.rules
         sorted_rules.sort()
         self.assertEqual(sorted_rules,
-                         [('A0', ['A5', 'S']),
-                          ('A0', ['S', 'A1']),
+                         [('A0', ['A5', 'A7']),
+                          ('A0', ['A7', 'A1']),
                           ('A0', ['b']),
-                          ('A1', ['A4', 'S']),
+                          ('A1', ['A4', 'A7']),
                           ('A1', ['b']),
-                          ('A2', ['A6', 'A0']),
-                          ('A2', ['eps']),
-                          ('A3', 'a'),
-                          ('A4', 'b'),
-                          ('A5', 'b'),
-                          ('A6', 'a'),
-                          ('S', ['A3', 'A0'])])
+                          ('A3', ['a']),
+                          ('A4', ['b']),
+                          ('A5', ['b']),
+                          ('A6', ['a']),
+                          ('A7', ['A3', 'A0']),
+                          ('S', ['A6', 'A0']),
+                          ('S', ['eps']),
+                          ])
 
 
 if __name__ == '__main__':

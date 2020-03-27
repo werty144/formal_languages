@@ -173,12 +173,32 @@ class CFGrammar:
             self.rules.remove((nonterminal, expr))
             self.add_rule(nonterminal, [new_nonterminal1, new_nonterminal2])
 
+    def make_S_start_nonterminal(self):
+        replace_symbol = self.get_fresh_nonterminal()
+        for nonterminal, rule in self.rules.copy():
+            new_nonterminal = nonterminal
+            if nonterminal == 'S':
+                new_nonterminal = replace_symbol
+            new_expr = [symb if symb != 'S' else replace_symbol for symb in rule]
+            self.rules.remove((nonterminal, rule))
+            self.add_rule(new_nonterminal, new_expr)
+
+        for nonterminal, rule in self.rules.copy():
+            new_nonterminal = nonterminal
+            if nonterminal == self.start_nonterminal:
+                new_nonterminal = 'S'
+            new_expr = [symb if symb != self.start_nonterminal else 'S' for symb in rule]
+            self.rules.remove((nonterminal, rule))
+            self.add_rule(new_nonterminal, new_expr)
+        self.start_nonterminal = 'S'
+
     def to_cnf(self):
         self.get_rid_of_long_rules()
         self.get_rid_of_eps_rules()
         self.get_rid_of_chain_rules()
         self.get_rid_of_useless_symbols()
         self.make_lonely_terminals()
+        self.make_S_start_nonterminal()
 
 
 def to_cnf_to_file(infile, outfile):
