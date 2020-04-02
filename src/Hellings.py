@@ -3,6 +3,7 @@ from src.CNF import CFGrammar
 
 class Graph:
     def __init__(self, triples):
+        triples = [s.split() for s in triples]
         self.vertices = []
         self.edges = triples
         self.edge_labels = []
@@ -64,19 +65,17 @@ def use_hellings(grammar_file, graph_file, result_file):
     grmf = open(grammar_file, 'r')
     grpf = open(graph_file, 'r')
     resf = open(result_file, 'w')
-    triples = [s.split() for s in grpf.readlines()]
+    triples = grpf.readlines()
+    grpf.close()
     graph = Graph(triples)
     rules = grmf.readlines()
+    grmf.close()
     grammar = CFGrammar(rules)
     res = hellings(grammar, graph)
+    for nonterminal, expr in grammar.rules:
+        resf.write(nonterminal + ' ' + ' '.join(expr) + '\n')
+    resf.write('\n')
     for nonterminal, u, v in res:
         if nonterminal == 'S':
             resf.write(u + ' ' + v + '\n')
-
-
-def main():
-    use_hellings('rules', 'graph', 'res')
-
-
-if __name__ == '__main__':
-    main()
+    resf.close()

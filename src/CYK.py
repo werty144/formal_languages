@@ -1,7 +1,7 @@
 from src.CNF import CFGrammar
 
 
-def nyc(grammar: CFGrammar, s: str):
+def cyk(grammar: CFGrammar, s: str):
     if len(s) == 0:
         return grammar.produces_eps()
     grammar.to_cnf()
@@ -36,14 +36,8 @@ def accepts(grammar_file, sring_file):
     gf = open(grammar_file, 'r')
     sf = open(sring_file, 'r')
     rules = gf.readlines()
+    gf.close()
     s = sf.readline()
+    sf.close()
     grammar = CFGrammar(rules)
-    print(nyc(grammar, s))
-
-
-def main():
-    accepts('rules', 'str')
-
-
-if __name__ == '__main__':
-    main()
+    print(cyk(grammar, s))
