@@ -204,6 +204,13 @@ class CFGrammar:
         self.get_rid_of_useless_symbols()
         self.make_lonely_terminals()
         self.make_S_start_nonterminal()
+        
+    def to_weak_cnf(self):
+        self.get_rid_of_long_rules()
+        self.get_rid_of_chain_rules()
+        self.get_rid_of_useless_symbols()
+        self.make_lonely_terminals()
+        self.make_S_start_nonterminal()
 
 
 def to_cnf_to_file(infile, outfile):

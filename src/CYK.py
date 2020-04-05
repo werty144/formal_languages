@@ -40,4 +40,7 @@ def accepts(grammar_file, sring_file):
     s = sf.readline()
     sf.close()
     grammar = CFGrammar(rules)
-    print(cyk(grammar, s))
+    if cyk(grammar, s):
+        print('Accepts')
+    else:
+        print('Does not accept')

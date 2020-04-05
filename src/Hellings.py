@@ -17,13 +17,15 @@ class Graph:
 
 
 def hellings(grammar: CFGrammar, graph: Graph):
-    grammar.to_cnf()
+    grammar.to_weak_cnf()
     res = []
     m = []
-    if ('S', ['eps']) in grammar.rules:
+    for nonterminal, expr in grammar.rules:
+        if not expr == ['eps']:
+            continue
         for v in graph.vertices:
-            res.append(('S', v, v))
-            m.append(('S', v, v))
+            res.append((nonterminal, v, v))
+            m.append((nonterminal, v, v))
 
     for u, c, v in graph.edges:
         for nonterminal, expr in grammar.rules:
