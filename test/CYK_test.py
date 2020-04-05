@@ -2,7 +2,6 @@ import io
 import unittest.mock
 import tempfile
 import unittest
-from distutils.util import strtobool
 from os import path
 
 from src.CYK import *
@@ -16,17 +15,17 @@ deterministic_cbs_rules = ['S ( S ) S',
                            'S eps']
 
 
-inherently_ambiguous_grammar = ['A a A',
+inherently_ambiguous_grammar = ['S A BC',
+                                'S AB C',
+                                'S eps',
+                                'A a A',
                                 'A eps',
                                 'C c C',
                                 'C eps',
-                                'AB a b AB',
+                                'AB a AB b',
                                 'AB eps',
-                                'BC b c BC',
-                                'BC eps',
-                                'S AB C',
-                                'S A BC',
-                                'S eps']
+                                'BC b BC c',
+                                'BC eps']
 
 
 class TestCYK(unittest.TestCase):
@@ -44,18 +43,18 @@ class TestCYK(unittest.TestCase):
 
     def test_cyk_on_inherently_ambiguous_grammar(self):
         grammar = CFGrammar(inherently_ambiguous_grammar)
-        self.assertTrue(cyk(grammar, 'ababababc'))
-        self.assertTrue(cyk(grammar, 'abababab'))
-        self.assertTrue(cyk(grammar, 'abccccccccccc'))
+        self.assertTrue(cyk(grammar, 'aaaabbbbc'))
+        self.assertTrue(cyk(grammar, 'aaaabbbb'))
+        self.assertTrue(cyk(grammar, 'abbbbcccc'))
         self.assertTrue(cyk(grammar, 'c'))
         self.assertTrue(cyk(grammar, ''))
-        self.assertTrue(cyk(grammar, 'aabcbcbc'))
+        self.assertTrue(cyk(grammar, 'aabbccccccccc'))
         self.assertTrue(cyk(grammar, 'aaaaaaabc'))
         self.assertTrue(cyk(grammar, 'bc'))
         self.assertTrue(cyk(grammar, 'a'))
         self.assertFalse(cyk(grammar, 'abcabc'))
         self.assertFalse(cyk(grammar, 'cab'))
-        self.assertFalse(cyk(grammar, 'aaabbbccc'))
+        self.assertFalse(cyk(grammar, 'aaabbccc'))
         self.assertFalse(cyk(grammar, 'abcd'))
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)

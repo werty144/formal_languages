@@ -52,17 +52,17 @@ cbs_rules_in_wcnf = ['A0 S A2',
                      'S eps']
 
 
-inherently_ambiguous_grammar = ['A a A',
+inherently_ambiguous_grammar = ['S A BC',
+                                'S AB C',
+                                'S eps',
+                                'A a A',
                                 'A eps',
                                 'C c C',
                                 'C eps',
-                                'AB a b AB',
+                                'AB a AB b',
                                 'AB eps',
-                                'BC b c BC',
-                                'BC eps',
-                                'S AB C',
-                                'S A BC',
-                                'S eps']
+                                'BC b BC c',
+                                'BC eps']
 
 correct_bracket_graph_s_acceptable = [('0', '0'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
                                       ('0', '2'), ('1', '0'), ('1', '4'), ('4', '0'), ('1', '2'), ('4', '2'),
