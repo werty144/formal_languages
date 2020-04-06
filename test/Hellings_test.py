@@ -2,71 +2,8 @@ import tempfile
 import unittest
 from os import path
 
+from Grammars_n_graphs import *
 from src.Hellings import *
-
-syllabus_graph_triples = ['0 a 1',
-                          '1 a 2',
-                          '2 a 0',
-                          '2 b 3',
-                          '3 b 2']
-
-my_bracket_graph_triples = ['0 ( 1',
-                            '1 ) 2',
-                            '1 ( 3',
-                            '3 ) 0',
-                            '3 ) 4',
-                            '4 ( 3',
-                            '4 ) 5']
-
-my_abc_graph_triples = ['0 a 1',
-                        '1 b 0',
-                        '1 c 2',
-                        '1 c 3',
-                        '1 b 4',
-                        '2 c 2',
-                        '2 a 6',
-                        '4 c 5',
-                        '5 a 3']
-
-syllabus_grammar_rules = ['S A B',
-                          'S A S1',
-                          'S1 S B',
-                          'A a',
-                          'B b']
-
-
-ambiguous_cbs_rules = ['S ( S )',
-                       'S S S',
-                       'S eps']
-
-
-deterministic_cbs_rules = ['S ( S ) S',
-                           'S eps']
-
-
-cbs_rules_in_wcnf = ['A0 S A2',
-                     'A1 (',
-                     'A2 )',
-                     'S A1 A0',
-                     'S S S',
-                     'S eps']
-
-
-inherently_ambiguous_grammar = ['S A BC',
-                                'S AB C',
-                                'S eps',
-                                'A a A',
-                                'A eps',
-                                'C c C',
-                                'C eps',
-                                'AB a AB b',
-                                'AB eps',
-                                'BC b BC c',
-                                'BC eps']
-
-correct_bracket_graph_s_acceptable = [('0', '0'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
-                                      ('0', '2'), ('1', '0'), ('1', '4'), ('4', '0'), ('1', '2'), ('4', '2'),
-                                      ('0', '5'), ('1', '5'), ('4', '5')]
 
 
 class TestHellings(unittest.TestCase):
@@ -74,13 +11,7 @@ class TestHellings(unittest.TestCase):
         grammar = CFGrammar(syllabus_grammar_rules)
         graph = Graph(syllabus_graph_triples)
         res = hellings(grammar, graph)
-        correct = [
-            ('A', '0', '1'), ('A', '1', '2'), ('A', '2', '0'), ('B', '2', '3'), ('B', '3', '2'),
-            ('S', '1', '3'), ('S1', '1', '2'), ('S', '0', '2'), ('S1', '0', '3'), ('S', '2', '3'),
-            ('S1', '2', '2'), ('S', '1', '2'), ('S1', '1', '3'), ('S', '0', '3'), ('S1', '0', '2'),
-            ('S', '2', '2'), ('S1', '2', '3')
-        ]
-        self.assertEqual(correct, res)
+        self.assertEqual(correct_syllabus_hellings_answer, res)
 
     def test_hellings_on_my_bracket_graph_on_ambiguous_grammar(self):
         grammar = CFGrammar(ambiguous_cbs_rules)
@@ -102,9 +33,7 @@ class TestHellings(unittest.TestCase):
         graph = Graph(my_abc_graph_triples)
         res = hellings(grammar, graph)
         s_acceptable = [(u, v) for nonterminal, u, v in res if nonterminal == 'S']
-        correct = [('0', '0'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('6', '6'), ('5', '5'), ('1', '2'),
-                   ('1', '3'), ('4', '5'), ('0', '1'), ('5', '3'), ('2', '6'), ('0', '5'), ('0', '4'), ('1', '5')]
-        self.assertEqual(sorted(correct), sorted(s_acceptable))
+        self.assertEqual(sorted(correct_s_acceptable_abc_graph), sorted(s_acceptable))
 
     def test_use_hellings_on_syllabus_example(self):
         self.test_dir = tempfile.gettempdir()
@@ -131,13 +60,7 @@ class TestHellings(unittest.TestCase):
         self.assertEqual(sorted(syllabus_grammar_rules), sorted(res_grammar))
 
         my_s_acceptable = lines[empty_str_ind + 1:]
-        correct_s_acceptable = ['1 3',
-                                '0 2',
-                                '2 3',
-                                '1 2',
-                                '0 3',
-                                '2 2']
-        self.assertEqual(correct_s_acceptable, my_s_acceptable)
+        self.assertEqual(correct_syllabus_s_acceptable, my_s_acceptable)
 
     def test_use_hellings_on_my_bracket_graph_example(self):
         self.test_dir = tempfile.gettempdir()

@@ -5,27 +5,7 @@ import unittest
 from os import path
 
 from src.CYK import *
-
-ambiguous_cbs_rules = ['S ( S )',
-                       'S S S',
-                       'S eps']
-
-
-deterministic_cbs_rules = ['S ( S ) S',
-                           'S eps']
-
-
-inherently_ambiguous_grammar = ['S A BC',
-                                'S AB C',
-                                'S eps',
-                                'A a A',
-                                'A eps',
-                                'C c C',
-                                'C eps',
-                                'AB a AB b',
-                                'AB eps',
-                                'BC b BC c',
-                                'BC eps']
+from Grammars_n_graphs import deterministic_cbs_rules, ambiguous_cbs_rules, inherently_ambiguous_grammar
 
 
 class TestCYK(unittest.TestCase):
