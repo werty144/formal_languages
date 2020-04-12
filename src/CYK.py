@@ -1,4 +1,4 @@
-from src.CNF import CFGrammar
+from src.CFG import CFGrammar
 
 
 def cyk(grammar: CFGrammar, s: str):

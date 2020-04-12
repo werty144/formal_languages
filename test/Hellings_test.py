@@ -9,7 +9,7 @@ from src.Hellings import *
 class TestHellings(unittest.TestCase):
     def test_hellings_on_syllabus_example(self):
         grammar = CFGrammar(syllabus_grammar_rules)
-        graph = Graph(syllabus_graph_triples)
+        graph = Graph(syllabus_graph_triples1)
         res = hellings(grammar, graph)
         self.assertEqual(correct_syllabus_hellings_answer, res)
 
@@ -44,7 +44,7 @@ class TestHellings(unittest.TestCase):
         rf.close()
         graph_file = path.join(self.test_dir, 'graph.txt')
         gf = open(graph_file, 'w')
-        for triple in syllabus_graph_triples:
+        for triple in syllabus_graph_triples1:
             gf.write(triple + '\n')
         gf.close()
         res_file = path.join(self.test_dir, 'res.txt')

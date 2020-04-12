@@ -223,4 +223,3 @@ def to_cnf_to_file(infile, outfile):
     for nonterminal, expr in my_grammar.rules:
         ouf.write(nonterminal + " " + ' '.join(expr) + '\n')
     ouf.close()
-

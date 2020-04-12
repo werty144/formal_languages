@@ -1,14 +1,20 @@
-syllabus_graph_triples = ['0 a 1',
-                          '1 a 2',
-                          '2 a 0',
-                          '2 b 3',
-                          '3 b 2']
+syllabus_graph_triples1 = ['0 a 1',
+                           '1 a 2',
+                           '2 a 0',
+                           '2 b 3',
+                           '3 b 2']
+
+syllabus_graph_triples2 = ['0 a 1',
+                           '0 b 3',
+                           '1 a 2',
+                           '2 a 0',
+                           '3 b 0']
 
 correct_syllabus_hellings_answer = [
-            ('A', '0', '1'), ('A', '1', '2'), ('A', '2', '0'), ('B', '2', '3'), ('B', '3', '2'),
-            ('S', '1', '3'), ('S1', '1', '2'), ('S', '0', '2'), ('S1', '0', '3'), ('S', '2', '3'),
-            ('S1', '2', '2'), ('S', '1', '2'), ('S1', '1', '3'), ('S', '0', '3'), ('S1', '0', '2'),
-            ('S', '2', '2'), ('S1', '2', '3')]
+    ('A', '0', '1'), ('A', '1', '2'), ('A', '2', '0'), ('B', '2', '3'), ('B', '3', '2'),
+    ('S', '1', '3'), ('S1', '1', '2'), ('S', '0', '2'), ('S1', '0', '3'), ('S', '2', '3'),
+    ('S1', '2', '2'), ('S', '1', '2'), ('S1', '1', '3'), ('S', '0', '3'), ('S1', '0', '2'),
+    ('S', '2', '2'), ('S1', '2', '3')]
 
 correct_syllabus_s_acceptable = ['1 3',
                                  '0 2',
@@ -41,15 +47,12 @@ syllabus_grammar_rules = ['S A B',
                           'A a',
                           'B b']
 
-
 ambiguous_cbs_rules = ['S ( S )',
                        'S S S',
                        'S eps']
 
-
 deterministic_cbs_rules = ['S ( S ) S',
                            'S eps']
-
 
 cbs_rules_in_wcnf = ['A0 S A2',
                      'A1 (',
@@ -57,7 +60,6 @@ cbs_rules_in_wcnf = ['A0 S A2',
                      'S A1 A0',
                      'S S S',
                      'S eps']
-
 
 inherently_ambiguous_grammar = ['S A BC',
                                 'S AB C',

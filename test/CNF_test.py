@@ -1,7 +1,7 @@
 import unittest
 import tempfile
 from os import path
-from src.CNF import *
+from src.CFG import *
 
 rules = ['S a X b X',
          'S a Z',
