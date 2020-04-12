@@ -1,7 +1,7 @@
 from CFG import CFGrammar
 import numpy as np
 from Grammars_n_graphs import *
-from Graph_utils import Graph
+from src.Graph_utils import Graph
 
 
 class Nonterminal_set:

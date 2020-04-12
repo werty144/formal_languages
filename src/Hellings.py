@@ -1,5 +1,5 @@
 from src.CFG import CFGrammar
-from Graph_utils import Graph
+from src.Graph_utils import Graph
 
 
 def hellings(grammar: CFGrammar, graph: Graph):
