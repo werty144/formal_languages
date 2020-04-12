@@ -1,8 +1,7 @@
 import tempfile
 import unittest
 from os import path
-import numpy as np
-from CF_reachability import *
+from src.CF_reachability import *
 
 from Grammars_n_graphs import *
 

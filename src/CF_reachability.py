@@ -1,4 +1,4 @@
-from CFG import CFGrammar
+from src.CFG import CFGrammar
 import numpy as np
 from Grammars_n_graphs import *
 from src.Graph_utils import Graph
