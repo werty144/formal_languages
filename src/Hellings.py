@@ -65,5 +65,5 @@ def use_hellings(grammar_file, graph_file, result_file):
     resf.write('\n')
     for nonterminal, u, v in res:
         if nonterminal == 'S':
-            resf.write(u + ' ' + v + '\n')
+            resf.write(str(u) + ' ' + str(v) + '\n')
     resf.close()

@@ -86,7 +86,7 @@ class TestHellings(unittest.TestCase):
         res_grammar = lines[:empty_str_ind]
         self.assertEqual(sorted(cbs_rules_in_wcnf), sorted(res_grammar))
         my_s_acceptable = lines[empty_str_ind + 1:]
-        correct_s_acceptable = [u + ' ' + v for u, v in correct_bracket_graph_s_acceptable]
+        correct_s_acceptable = [str(u) + ' ' + str(v) for u, v in correct_bracket_graph_s_acceptable]
         self.assertEqual(sorted(correct_s_acceptable), sorted(my_s_acceptable))
 
 
