@@ -57,7 +57,7 @@ class TestCF_reachability(unittest.TestCase):
         self.assertTrue(np.array_equal(m1 + m2, m3))
 
     def test_matrix_multiplication(self):
-        self.assertTrue(np.array_equal(np.matmul(m1, m1), m2))
+        self.assertTrue(np.array_equal(np.dot(m1, m1), m2))
 
     def test_reachability_using_matrix(self):
         graph = Graph(syllabus_graph_triples2)
