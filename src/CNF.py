@@ -45,6 +45,9 @@ class CFGrammar:
             i += 1
         return 'A' + str(i)
 
+    def produces_eps(self):
+        return self.start_nonterminal in self.get_eps_producing_nonterminals()
+
     def get_rid_of_long_rules(self):
         for nonterminal, expr in self.rules:
             if len(expr) <= 2:
@@ -174,6 +177,8 @@ class CFGrammar:
             self.add_rule(nonterminal, [new_nonterminal1, new_nonterminal2])
 
     def make_S_start_nonterminal(self):
+        if self.start_nonterminal == 'S':
+            return
         replace_symbol = self.get_fresh_nonterminal()
         for nonterminal, rule in self.rules.copy():
             new_nonterminal = nonterminal
@@ -195,6 +200,13 @@ class CFGrammar:
     def to_cnf(self):
         self.get_rid_of_long_rules()
         self.get_rid_of_eps_rules()
+        self.get_rid_of_chain_rules()
+        self.get_rid_of_useless_symbols()
+        self.make_lonely_terminals()
+        self.make_S_start_nonterminal()
+        
+    def to_weak_cnf(self):
+        self.get_rid_of_long_rules()
         self.get_rid_of_chain_rules()
         self.get_rid_of_useless_symbols()
         self.make_lonely_terminals()
