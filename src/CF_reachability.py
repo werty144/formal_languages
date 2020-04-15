@@ -85,14 +85,3 @@ def use_reachability_using_matrix(grammar_file, graph_file, result_file):
             if 'S' in res[i][j]:
                 resf.write(str(i) + ' ' + str(j) + '\n')
     resf.close()
-
-
-def main():
-    graph = Graph(my_bracket_graph_triples)
-    grammar = CFGrammar(deterministic_cbs_rules)
-    for huy in reachability_using_matrix(grammar, graph):
-        print(huy)
-
-
-if __name__ == '__main__':
-    main()
