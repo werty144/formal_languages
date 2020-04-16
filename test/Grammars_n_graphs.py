@@ -1,3 +1,5 @@
+import networkx as nx
+
 syllabus_graph_triples1 = ['0 a 1',
                            '1 a 2',
                            '2 a 0',
@@ -80,3 +82,57 @@ correct_s_acceptable_abc_graph = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (6, 6)
 correct_bracket_graph_s_acceptable = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5),
                                       (0, 2), (1, 0), (1, 4), (4, 0), (1, 2), (4, 2),
                                       (0, 5), (1, 5), (4, 5)]
+
+
+def make_syllabus_pda_graph1():
+    syllabus_graph = nx.DiGraph()
+    syllabus_graph.add_edge(0, 1, label=['a'])
+    syllabus_graph.add_edge(1, 2, label=['S'])
+    syllabus_graph.add_edge(1, 3, label=['b'])
+    syllabus_graph.add_edge(2, 3, label=['b'])
+    syllabus_graph.nodes[0]['is_start'] = True
+    syllabus_graph.nodes[1]['is_start'] = False
+    syllabus_graph.nodes[2]['is_start'] = False
+    syllabus_graph.nodes[3]['is_start'] = False
+    syllabus_graph.nodes[0]['is_final'] = False
+    syllabus_graph.nodes[1]['is_final'] = False
+    syllabus_graph.nodes[2]['is_final'] = False
+    syllabus_graph.nodes[3]['is_final'] = True
+    return syllabus_graph
+
+
+def make_syllabus_pda_graph2():
+    syllabus_graph = nx.DiGraph()
+    syllabus_graph.add_edge(0, 1, label='a')
+    syllabus_graph.add_edge(1, 2, label='S')
+    syllabus_graph.add_edge(2, 3, label='b')
+    syllabus_graph.add_edge(3, 4, label='S')
+    syllabus_graph.nodes[0]['is_start'] = True
+    syllabus_graph.nodes[1]['is_start'] = False
+    syllabus_graph.nodes[2]['is_start'] = False
+    syllabus_graph.nodes[3]['is_start'] = False
+    syllabus_graph.nodes[4]['is_start'] = False
+    syllabus_graph.nodes[0]['is_final'] = True
+    syllabus_graph.nodes[1]['is_final'] = False
+    syllabus_graph.nodes[2]['is_final'] = False
+    syllabus_graph.nodes[3]['is_final'] = False
+    syllabus_graph.nodes[4]['is_final'] = True
+    return syllabus_graph
+
+
+def make_syllabus_graph2():
+    graph = nx.DiGraph()
+    graph.add_edge(0, 1, label=['a'])
+    graph.add_edge(1, 2, label=['b'])
+    graph.add_edge(2, 3, label=['a'])
+    graph.add_edge(3, 4, label=['b'])
+    graph.add_edge(4, 5, label=['a'])
+    graph.add_edge(5, 6, label=['b'])
+    return graph
+
+
+def make_syllabus_graph1():
+    graph = nx.DiGraph()
+    for (u, l, v) in [triple.split() for triple in syllabus_graph_triples1]:
+        graph.add_edge(int(u), int(v), label=[l])
+    return graph

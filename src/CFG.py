@@ -223,6 +223,7 @@ class CFGrammar:
     def read_hard_from_file(self, file_name):
         file = open(file_name)
         lines = file.read().splitlines()
+        file.close()
         self.split_hard_lines(lines)
 
     def split_hard_lines(self, lines):

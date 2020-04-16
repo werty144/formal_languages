@@ -5,7 +5,7 @@ import numpy as np
 from src.CFG import CFGrammar
 
 
-def regex_to_pda_graph(regex):
+def regex_to_pda_graph(regex, first_node_number):
     regex = Regex(regex)
     nfa: EpsilonNFA = regex.to_epsilon_nfa().minimize()
     graph: nx.MultiDiGraph = nfa.to_networkx()
@@ -16,7 +16,7 @@ def regex_to_pda_graph(regex):
     for node in killing_list:
         graph.remove_node(node)
     my_map = {}
-    i = 0
+    i = first_node_number
     for node in sorted(graph.nodes):
         my_map[node] = i
         i += 1
@@ -66,7 +66,10 @@ def diff(li1, li2):
     return li_dif
 
 
-def reachability_using_kron(pda_graph: nx.Graph, graph: nx.Graph, grammar: CFGrammar):
+def reachability_using_kron(pda_graph: nx.Graph, graph: nx.Graph, get_nonterminals, grammar: CFGrammar):
+    if grammar.produces_eps():
+        for i in range(len(graph.nodes)):
+            graph.add_edge(i, i, label=grammar.get_eps_producing_nonterminals())
     changes = True
     while changes:
         changes = False
@@ -80,48 +83,34 @@ def reachability_using_kron(pda_graph: nx.Graph, graph: nx.Graph, grammar: CFGra
             if pda_graph.nodes[s]['is_start'] and pda_graph.nodes[f]['is_final']:
                 x, y = edge[0][1], edge[1][1]
                 if y not in graph[x].keys():
-                    graph.add_edge(x, y, label=['S'])
+                    graph.add_edge(x, y, label=[get_nonterminals[x]])
                     changes = True
                 elif 'S' not in graph[x][y]['label']:
                     changes = True
-                    graph[x][y]['label'] += ['S']
+                    graph[x][y]['label'].append(get_nonterminals[x])
     return graph
 
 
 def use_reachability_using_kron(grammar_file, graph_file, res_file):
+    grm_file = open(grammar_file, 'r')
     grammar = CFGrammar([])
     grammar.read_hard_from_file(grammar_file)
-    grammar_file = open(grammar_file, 'r')
-    regexs = grammar_file.read().splitlines()
+    regexs = grm_file.read().splitlines()
+    grm_file.close()
+    pda_graph = nx.DiGraph()
+    get_nonterminals = {}
     for regex in regexs:
-        pda_graph = regex_to_pda_graph(regex[1:])
-
-    #
-    # syllabus_graph = nx.DiGraph()
-    # syllabus_graph.add_edge(0, 1, label=['a'])
-    # syllabus_graph.add_edge(1, 2, label=['S'])
-    # syllabus_graph.add_edge(1, 3, label=['b'])
-    # syllabus_graph.add_edge(2, 3, label=['b'])
-    # syllabus_graph.nodes[0]['is_start'] = True
-    # syllabus_graph.nodes[1]['is_start'] = False
-    # syllabus_graph.nodes[2]['is_start'] = False
-    # syllabus_graph.nodes[3]['is_start'] = False
-    # syllabus_graph.nodes[0]['is_final'] = False
-    # syllabus_graph.nodes[1]['is_final'] = False
-    # syllabus_graph.nodes[2]['is_final'] = False
-    # syllabus_graph.nodes[3]['is_final'] = True
-    #
+        new_component = regex_to_pda_graph(regex[1:], len(pda_graph.nodes))
+        pda_graph = nx.union(pda_graph, new_component)
+        for node in new_component.nodes:
+            get_nonterminals[node] = regex[0]
 
     grpf = open(graph_file, 'r')
     graph = nx.DiGraph()
     for (u, l, v) in [triple.split() for triple in grpf.read().splitlines()]:
         graph.add_edge(int(u), int(v), label=[l])
     grpf.close()
-    res_graph = reachability_using_kron(pda_graph, graph, grammar)
-
-    print(pda_graph.nodes(data=True))
-    print(pda_graph.edges(data=True))
-    print(pda_graph[1][2])
+    res_graph = reachability_using_kron(pda_graph, graph, get_nonterminals, grammar)
 
     rf = open(res_file, 'w')
     n = len(pda_graph.nodes)
@@ -137,6 +126,3 @@ def use_reachability_using_kron(grammar_file, graph_file, res_file):
         if 'S' in edge[2]:
             rf.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
     rf.close()
-
-
-use_reachability_using_kron('grammar', 'graph', 'result')
