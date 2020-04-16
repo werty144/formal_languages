@@ -76,18 +76,16 @@ def reachability_using_kron(pda_graph: nx.Graph, graph: nx.Graph, get_nontermina
         m3 = my_tensor_prod(pda_graph, graph)
         m3_closure = nx.transitive_closure(m3)
         for edge in m3_closure.edges(data='label'):
-            if edge[2] is not None:
-                continue
             s = edge[0][0]
             f = edge[1][0]
             if pda_graph.nodes[s]['is_start'] and pda_graph.nodes[f]['is_final']:
                 x, y = edge[0][1], edge[1][1]
                 if y not in graph[x].keys():
-                    graph.add_edge(x, y, label=[get_nonterminals[x]])
+                    graph.add_edge(x, y, label=[get_nonterminals[s]])
                     changes = True
-                elif 'S' not in graph[x][y]['label']:
+                elif get_nonterminals[s] not in graph[x][y]['label']:
                     changes = True
-                    graph[x][y]['label'].append(get_nonterminals[x])
+                    graph[x][y]['label'].append(get_nonterminals[s])
     return graph
 
 

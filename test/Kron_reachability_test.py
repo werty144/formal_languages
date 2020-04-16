@@ -65,6 +65,48 @@ class TestKronReachability(unittest.TestCase):
         my_s_acceptable = lines[empty_str_ind + 1:]
         self.assertEqual(sorted(correct_syllabus_s_acceptable), sorted(my_s_acceptable))
 
+    def test_using_reachability_using_kron_on_syllabus_example1_normal_input(self):
+        self.test_dir = tempfile.gettempdir()
+        grammar_file = path.join(self.test_dir, 'rules.txt')
+        rf = open(grammar_file, 'w')
+        rf.write('S A B\n')
+        rf.write('S A S B\n')
+        rf.write('A a\n')
+        rf.write('B b\n')
+        rf.close()
+        graph_file = path.join(self.test_dir, 'graph.txt')
+        gf = open(graph_file, 'w')
+        for triple in syllabus_graph_triples1:
+            gf.write(triple + '\n')
+        gf.close()
+        res_file = path.join(self.test_dir, 'res.txt')
+        use_reachability_using_kron(grammar_file, graph_file, res_file)
+
+        rf = open(res_file, 'r')
+        lines = rf.read().splitlines()
+        rf.close()
+        try:
+            empty_str_ind = lines.index('')
+        except ValueError:
+            self.fail()
+
+        res_matrix = lines[:empty_str_ind]
+        correct_matrix = ["..['A']........",
+                          "...........",
+                          ".['B'].........",
+                          ".....['A'].....",
+                          "...........",
+                          "......['S']....",
+                          "....['B']......",
+                          "........['a']..",
+                          "...........",
+                          "..........['b']",
+                          "..........."]
+        self.assertEqual(res_matrix, correct_matrix)
+
+        my_s_acceptable = lines[empty_str_ind + 1:]
+        self.assertEqual(sorted(correct_syllabus_s_acceptable), sorted(my_s_acceptable))
+
     def test_using_reachability_using_kron_on_syllabus_example1_hard_input(self):
         self.test_dir = tempfile.gettempdir()
         grammar_file = path.join(self.test_dir, 'rules.txt')
