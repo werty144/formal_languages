@@ -3,7 +3,6 @@ from pyformlang.finite_automaton import EpsilonNFA
 import networkx as nx
 import numpy as np
 from src.CFG import CFGrammar
-from src.CF_reachability import Nonterminal_set
 
 
 def regex_to_pda_graph(regex):
@@ -22,37 +21,122 @@ def regex_to_pda_graph(regex):
         my_map[node] = i
         i += 1
     graph: nx.Graph = nx.relabel_nodes(graph, my_map)
-    return graph
+    for edge in graph.edges:
+        graph.edges[edge]['label'] = [graph.edges[edge]['label']]
+    return nx.DiGraph(graph)
 
 
-def make_matrix_from_graph(graph: nx.Graph, grammar: CFGrammar):
+def make_matrix_from_graph(graph: nx.Graph):
     n = len(graph.nodes)
     arr = []
     for i in range(n):
         arr.append([])
         for j in range(n):
-            arr[i].append(Nonterminal_set(grammar.rules))
+            arr[i].append([])
             if (i, j) in graph.edges:
                 try:
-                    arr[i][j].add_nonterminal(graph.edges[(i, j, 0)]['label'])
+                    arr[i][j].append(graph.edges[(i, j, 0)]['label'])
                 except KeyError:
                     pass
 
-    matrix = np.array(arr)
-    print(matrix)
+    return np.array(arr)
 
 
-g = regex_to_pda_graph('(a b) | (a S b)')
-print(g.nodes(data='is_start'))
-print(g.nodes(data='is_final'))
-print(g.edges(data=True))
+def my_tensor_prod(g1, g2):
+    res = nx.tensor_product(g1, g2)
+    killing_list = []
+    for edge in res.edges:
+        arr1, arr2 = res.edges[edge]['label']
+        if not intersection(arr1, arr2):
+            killing_list.append(edge)
+        else:
+            res.edges[edge]['label'] = intersection(arr1, arr2)
+    for edge in killing_list:
+        res.remove_edge(edge[0], edge[1])
+    return nx.DiGraph(res)
 
-grammar = CFGrammar([])
-grammar.read_hard_from_file('input')
 
-make_matrix_from_graph(g, grammar)
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
 
-#
-# a1 = np.array([[1, 0], [0, 1]])
-# a2 = np.array([[1, 2], [3, 4]])
-# print(np.kron(a1, a2))
+
+def diff(li1, li2):
+    li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
+    return li_dif
+
+
+def reachability_using_kron(pda_graph: nx.Graph, graph: nx.Graph, grammar: CFGrammar):
+    changes = True
+    while changes:
+        changes = False
+        m3 = my_tensor_prod(pda_graph, graph)
+        m3_closure = nx.transitive_closure(m3)
+        for edge in m3_closure.edges(data='label'):
+            if edge[2] is not None:
+                continue
+            s = edge[0][0]
+            f = edge[1][0]
+            if pda_graph.nodes[s]['is_start'] and pda_graph.nodes[f]['is_final']:
+                x, y = edge[0][1], edge[1][1]
+                if y not in graph[x].keys():
+                    graph.add_edge(x, y, label=['S'])
+                    changes = True
+                elif 'S' not in graph[x][y]['label']:
+                    changes = True
+                    graph[x][y]['label'] += ['S']
+    return graph
+
+
+def use_reachability_using_kron(grammar_file, graph_file, res_file):
+    grammar = CFGrammar([])
+    grammar.read_hard_from_file(grammar_file)
+    grammar_file = open(grammar_file, 'r')
+    regexs = grammar_file.read().splitlines()
+    for regex in regexs:
+        pda_graph = regex_to_pda_graph(regex[1:])
+
+    #
+    # syllabus_graph = nx.DiGraph()
+    # syllabus_graph.add_edge(0, 1, label=['a'])
+    # syllabus_graph.add_edge(1, 2, label=['S'])
+    # syllabus_graph.add_edge(1, 3, label=['b'])
+    # syllabus_graph.add_edge(2, 3, label=['b'])
+    # syllabus_graph.nodes[0]['is_start'] = True
+    # syllabus_graph.nodes[1]['is_start'] = False
+    # syllabus_graph.nodes[2]['is_start'] = False
+    # syllabus_graph.nodes[3]['is_start'] = False
+    # syllabus_graph.nodes[0]['is_final'] = False
+    # syllabus_graph.nodes[1]['is_final'] = False
+    # syllabus_graph.nodes[2]['is_final'] = False
+    # syllabus_graph.nodes[3]['is_final'] = True
+    #
+
+    grpf = open(graph_file, 'r')
+    graph = nx.DiGraph()
+    for (u, l, v) in [triple.split() for triple in grpf.read().splitlines()]:
+        graph.add_edge(int(u), int(v), label=[l])
+    grpf.close()
+    res_graph = reachability_using_kron(pda_graph, graph, grammar)
+
+    print(pda_graph.nodes(data=True))
+    print(pda_graph.edges(data=True))
+    print(pda_graph[1][2])
+
+    rf = open(res_file, 'w')
+    n = len(pda_graph.nodes)
+    for i in range(n):
+        for j in range(n):
+            if j in pda_graph[i].keys():
+                rf.write(str(pda_graph[i][j]['label']))
+            else:
+                rf.write('.')
+        rf.write('\n')
+    rf.write('\n')
+    for edge in res_graph.edges(data='label'):
+        if 'S' in edge[2]:
+            rf.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
+    rf.close()
+
+
+use_reachability_using_kron('grammar', 'graph', 'result')
