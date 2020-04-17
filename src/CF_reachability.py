@@ -58,9 +58,10 @@ def reachability_using_matrix(grammar: CFGrammar, graph: Graph):
     changes = True
     while changes:
         changes = False
-        old_t = t.copy()
+        nonterminals_amount = [[[len(s.nonterminals)] for s in row] for row in t.tolist()]
         t = t + np.dot(t, t)
-        if not np.array_equal(t, old_t):
+        new_nonterminals_amount = [[[len(s.nonterminals)] for s in row] for row in t.tolist()]
+        if nonterminals_amount != new_nonterminals_amount:
             changes = True
     return [[s.nonterminals for s in row] for row in t.tolist()]
 
