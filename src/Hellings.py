@@ -1,19 +1,5 @@
-from src.CNF import CFGrammar
-
-
-class Graph:
-    def __init__(self, triples):
-        triples = [s.split() for s in triples]
-        self.vertices = []
-        self.edges = triples
-        self.edge_labels = []
-        for u, c, v in triples:
-            if u not in self.vertices:
-                self.vertices.append(u)
-            if v not in self.vertices:
-                self.vertices.append(v)
-            if c not in self.edge_labels:
-                self.edge_labels.append(c)
+from src.CFG import CFGrammar
+from src.Graph_utils import Graph
 
 
 def hellings(grammar: CFGrammar, graph: Graph):
@@ -79,5 +65,5 @@ def use_hellings(grammar_file, graph_file, result_file):
     resf.write('\n')
     for nonterminal, u, v in res:
         if nonterminal == 'S':
-            resf.write(u + ' ' + v + '\n')
+            resf.write(str(u) + ' ' + str(v) + '\n')
     resf.close()

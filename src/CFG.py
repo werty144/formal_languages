@@ -1,3 +1,11 @@
+from lark import Tree, Token
+from src.parser import parse_line
+
+
+def split_token(t):
+    return t.value
+
+
 class CFGrammar:
     def __init__(self, rules):
         self.rules = []
@@ -212,6 +220,69 @@ class CFGrammar:
         self.make_lonely_terminals()
         self.make_S_start_nonterminal()
 
+    def read_hard_from_file(self, file_name):
+        file = open(file_name)
+        lines = file.read().splitlines()
+        file.close()
+        self.split_hard_lines(lines)
+
+    def split_hard_lines(self, lines):
+        start_symb = ''
+        for line in lines:
+            tree = parse_line(line)
+            term = tree.children[0]
+            if start_symb == '':
+                start_symb = term.value
+                self.start_nonterminal = term.value
+            self.add_rule(term.value, self.split_tree(tree.children[1]))
+
+    def split_tree(self, tree: Tree):
+        tree_type = tree.data
+        if tree_type == 'expr':
+            c = tree.children[0]
+            if type(c) == Token:
+                return [split_token(c)]
+            return self.split_tree(c)
+        if tree_type == 'or_expr':
+            return self.split_or_expr(tree)
+        if tree_type == 'star_expr':
+            return self.split_star_expr(tree)
+        if tree_type == 'ready_expr':
+            ret = []
+            for token in tree.children:
+                ret += [token.value]
+            return ret
+        if tree_type == 'set_expr':
+            ret = []
+            for c in tree.children:
+                if type(c) == Tree:
+                    ret += self.split_tree(c)
+                else:
+                    ret += split_token(c)
+            return ret
+
+    def split_or_expr(self, tree):
+        t1 = tree.children[0]
+        t2 = tree.children[1]
+        term = self.get_fresh_nonterminal()
+        self.add_rule(term, self.split_tree(t1))
+        self.add_rule(term, self.split_tree(t2))
+        return [term]
+
+    def split_star_expr(self, tree):
+        if type(tree.children[0]) == Token:
+            token = tree.children[0]
+            term = self.get_fresh_nonterminal()
+            self.add_rule(term, [token.value, term])
+            self.add_rule(term, ['eps'])
+            return [term]
+        else:
+            rule = self.split_tree(tree.children[0])
+            term = self.get_fresh_nonterminal()
+            self.add_rule(term, rule + [term])
+            self.add_rule(term, ['eps'])
+            return [term]
+
 
 def to_cnf_to_file(infile, outfile):
     inf = open(infile, "r")
@@ -223,4 +294,3 @@ def to_cnf_to_file(infile, outfile):
     for nonterminal, expr in my_grammar.rules:
         ouf.write(nonterminal + " " + ' '.join(expr) + '\n')
     ouf.close()
-
