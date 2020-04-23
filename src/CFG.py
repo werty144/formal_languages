@@ -57,7 +57,7 @@ class CFGrammar:
         return self.start_nonterminal in self.get_eps_producing_nonterminals()
 
     def get_rid_of_long_rules(self):
-        for nonterminal, expr in self.rules:
+        for nonterminal, expr in self.rules.copy():
             if len(expr) <= 2:
                 continue
             last = nonterminal

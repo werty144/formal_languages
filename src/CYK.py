@@ -1,7 +1,7 @@
 from src.CFG import CFGrammar
 
 
-def cyk(grammar: CFGrammar, s: str):
+def cyk(grammar: CFGrammar, s):
     if len(s) == 0:
         return grammar.produces_eps()
     grammar.to_cnf()
@@ -11,7 +11,6 @@ def cyk(grammar: CFGrammar, s: str):
         d.append([])
         for j in range(n):
             d[i].append([])
-
     for i in range(n):
         for nonterminal, expr in grammar.rules:
             if expr[0] == s[i]:
@@ -28,7 +27,6 @@ def cyk(grammar: CFGrammar, s: str):
                         continue
                     if expr[0] in left and expr[1] in right:
                         d[i][j].append(nonterminal)
-
     return grammar.start_nonterminal in d[0][n - 1]
 
 
