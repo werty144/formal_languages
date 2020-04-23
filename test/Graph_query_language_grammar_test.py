@@ -1,6 +1,3 @@
-import io
-import unittest.mock
-import tempfile
 import unittest
 import os
 
@@ -9,7 +6,7 @@ from src.CFG import CFGrammar
 
 
 def get_grammar():
-    grammar_file = open(os.pardir + '/query_languages/graph_query_language_grammar')
+    grammar_file = open(os.path.dirname(__file__) + '/query_languages/graph_query_language_grammar')
     rules = grammar_file.read().splitlines()
     grammar_file.close()
     grammar = CFGrammar(rules)
