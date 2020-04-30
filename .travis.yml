@@ -6,7 +6,7 @@ install:
   - pip3 install rdflib
   - pip3 install pyformlang
   - pip3 install lark-parser
-  - pip3 install antlr4-python3-runtimegit
+  - pip3 install antlr4-python3-runtime
 # command to run tests
 script:
   - python3 -m unittest discover -s test -p '*_test.py'
