@@ -6,37 +6,31 @@ from io import StringIO
 
 from src.Db_query_script_analyzer import *
 
-dot_header = 'graph G{\n' \
-             '  ranksep=.25;\n' \
-             '  edge [arrowsize=.5]\n' \
-             '  node [shape=plaintext, fontname="ArialNarrow",\n' \
-             '        fontsize=12, fixedsize=true, height=.30];\n'
-
 correct_dot_s1 = dot_header + \
-                '  0 [label="label1"]\n' \
-                '  1 [label="label2"]\n' \
-                '  0 -- 1;\n' \
-                '}\n'
+                 '  0 [label="label1"]\n' \
+                 '  1 [label="label2"]\n' \
+                 '  0 -- 1;\n' \
+                 '}\n'
 
 correct_dot_s2 = dot_header + \
-                '  0 [label="Script"]\n'\
-                '  1 [label=";"]\n'\
-                '  2 [label="Stmt"]\n'\
-                '  3 [label="CONNECT"]\n'\
-                '  4 [label="TO"]\n'\
-                '  5 [label="[myfile]"]\n'\
-                '  0 -- 1;\n'\
-                '  0 -- 2;\n'\
-                '  2 -- 3;\n'\
-                '  2 -- 4;\n'\
-                '  2 -- 5;\n'\
-                '}\n'
+                 '  0 [label="Script"]\n' \
+                 '  1 [label=";"]\n' \
+                 '  2 [label="Stmt"]\n' \
+                 '  3 [label="CONNECT"]\n' \
+                 '  4 [label="TO"]\n' \
+                 '  5 [label="[myfile]"]\n' \
+                 '  0 -- 1;\n' \
+                 '  0 -- 2;\n' \
+                 '  2 -- 3;\n' \
+                 '  2 -- 4;\n' \
+                 '  2 -- 5;\n' \
+                 '}\n'
 
-empty_input_dot = dot_header +\
-                '  0 [label="Script"]\n'\
-                '  1 [label="<EOF>"]\n'\
-                '  0 -- 1;\n'\
-                '}\n'
+empty_input_dot = dot_header + \
+                  '  0 [label="Script"]\n' \
+                  '  1 [label="<EOF>"]\n' \
+                  '  0 -- 1;\n' \
+                  '}\n'
 
 
 class Buffer:
@@ -126,6 +120,64 @@ class TestDBQueryScriptAnalyzer(unittest.TestCase):
         of.close()
         self.assertEqual(empty_input_dot, dot_s)
         self.assertEqual('Success\n', mock_out.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_syllabus_example(self, mock_out):
+        self.test_dir = tempfile.gettempdir()
+        out_file = path.join(self.test_dir, 'out.dot')
+        in_file = path.join(self.test_dir, 'input')
+        inf = open(in_file, 'w')
+        script = 'CONNECT TO [graph_db];\n' \
+                 'S = a S b S | () ;\n' \
+                 'SELECT COUNT(u) FROM [g1.txt] WHERE (v.ID = 10) - S -> (u);\n'
+        inf.write(script)
+        inf.close()
+        main([None, '--file', in_file, out_file])
+        self.assertEqual('Success\n', mock_out.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_bad_syllabus_example(self, mock_out):
+        self.test_dir = tempfile.gettempdir()
+        out_file = path.join(self.test_dir, 'out.dot')
+        in_file = path.join(self.test_dir, 'input')
+        inf = open(in_file, 'w')
+        script = 'CONNECT TO [graph_db];\n' \
+                 'S = a S b S | () ;\n' \
+                 'SELECT COUNT u FROM [g1.txt] WHERE (v.ID = 10) - S -> (u);\n'
+        inf.write(script)
+        inf.close()
+        main([None, '--file', in_file, out_file])
+        self.assertEqual('Failed\n', mock_out.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_my_function(self, mock_out):
+        self.test_dir = tempfile.gettempdir()
+        out_file = path.join(self.test_dir, 'out.dot')
+        in_file = path.join(self.test_dir, 'input')
+        inf = open(in_file, 'w')
+        script = 'WRITE SELECT COUNT_NEIGHBOURS (u) FROM [file.123]\n' \
+                 'WHERE (u.ID = 144)\n' \
+                 '- N - > (u)\n' \
+                 'TO [File_out.txt];'
+        inf.write(script)
+        inf.close()
+        main([None, '--file', in_file, out_file])
+        self.assertEqual('Success\n', mock_out.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_bad_my_function(self, mock_out):
+        self.test_dir = tempfile.gettempdir()
+        out_file = path.join(self.test_dir, 'out.dot')
+        in_file = path.join(self.test_dir, 'input')
+        inf = open(in_file, 'w')
+        script = 'WRITE SELECT COUNT_NEIGHBOURS (u) FROM [file.123]\n' \
+                 'where (u.ID = 144)\n' \
+                 '- N - > (u)\n' \
+                 'TO [File_out.txt];'
+        inf.write(script)
+        inf.close()
+        main([None, '--file', in_file, out_file])
+        self.assertEqual('Failed\n', mock_out.getvalue())
 
 
 if __name__ == '__main__':

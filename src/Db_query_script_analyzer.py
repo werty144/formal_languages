@@ -6,6 +6,12 @@ from gen.graph_query_grammarLexer import graph_query_grammarLexer
 from gen.graph_query_grammarParser import graph_query_grammarParser
 from gen.graph_query_grammarListener import graph_query_grammarListener
 
+dot_header = 'graph G{\n' \
+             '  ranksep=.25;\n' \
+             '  edge [arrowsize=.5]\n' \
+             '  node [shape=plaintext, fontname="ArialNarrow",\n' \
+             '        fontsize=12, fixedsize=true, height=.30];\n'
+
 
 class Graph:
     def __init__(self):
@@ -19,9 +25,7 @@ class Graph:
         return "edges: %s, functions: %s" % (str(self.edges), self.nodes)
 
     def to_DOT(self):
-        buf = ''.join(["graph G{\n", "  ranksep=.25;\n", "  edge [arrowsize=.5]\n",
-                       "  node [shape=plaintext, fontname=\"ArialNarrow\",\n",
-                       "        fontsize=12, fixedsize=true, height=.30];\n"])
+        buf = dot_header
         for node, label in self.nodes:
             buf = ''.join([buf, "  ", f'{node} [label="{label}"]\n'])
         for src, trg in self.edges:
