@@ -7,7 +7,7 @@ install:
   - pip3 install pyformlang
   - pip3 install lark-parser
   - pip3 install antlr4-python3-runtime
-  - sudo apt install antlr4
+  - sudo apt-get install -y antlr4
 # command to run tests
 script:
   - antlr4 -o gen/ query_languages/graph_query_grammar.g4
