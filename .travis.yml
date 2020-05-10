@@ -1,10 +1,12 @@
+dist: bionic
+
 language: python
 python:
   - "3.6"
 
 install:
   - pip3 install -r requirements.txt
-  - sudo apt-get install -y antlr4
+  - sudo apt-get install -y antlr4=4.7.2-1~18.04
 # command to run tests
 script:
   - antlr4 -Dlanguage=Python3 -o gen/ query_languages/graph_query_grammar.g4
