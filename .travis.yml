@@ -3,13 +3,10 @@ python:
   - "3.6"
 
 install:
-  - pip3 install rdflib
-  - pip3 install pyformlang
-  - pip3 install lark-parser
-  - pip3 install antlr4-python3-runtime
+  - pip3 install -r requirements.txt
   - sudo apt-get install -y antlr4
 # command to run tests
 script:
-  - antlr4 -o gen/ query_languages/graph_query_grammar.g4
+  - antlr4 -Dlanguage=Python3 -o gen/ query_languages/graph_query_grammar.g4
   - python3 -m unittest discover -s test -p '*_test.py'
 
