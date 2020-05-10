@@ -2,9 +2,9 @@ import sys
 from antlr4 import *
 from antlr4.tree.Tree import TerminalNodeImpl
 from antlr4.tree.Trees import Trees
-from gen.graph_query_grammarLexer import graph_query_grammarLexer
-from gen.graph_query_grammarParser import graph_query_grammarParser
-from gen.graph_query_grammarListener import graph_query_grammarListener
+from gen.query_languages.graph_query_grammarLexer import graph_query_grammarLexer
+from gen.query_languages.graph_query_grammarParser import graph_query_grammarParser
+from gen.query_languages.graph_query_grammarListener import graph_query_grammarListener
 
 dot_header = 'graph G{\n' \
              '  ranksep=.25;\n' \
