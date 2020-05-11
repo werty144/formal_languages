@@ -9,6 +9,6 @@ install:
   - sudo apt-get install -y antlr4=4.7.2-1~18.04
 # command to run tests
 script:
-  - antlr4 -Dlanguage=Python3 -o gen/ query_languages/graph_query_grammar.g4
+  - antlr4 -visitor -Dlanguage=Python3 -o gen/ query_languages/graph_query_grammar.g4
   - python3 -m unittest discover -s test -p '*_test.py'
 
