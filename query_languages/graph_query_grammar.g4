@@ -7,6 +7,7 @@ script
 
 stmt
     : Kw_connect Kw_to String
+    | Kw_list Kw_all Kw_graphs
     | select_stmt
     | named_pattern
     | Kw_write select_stmt Kw_to String
