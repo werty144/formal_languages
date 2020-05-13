@@ -68,7 +68,8 @@ class QueryProcessingTest(unittest.TestCase):
             src.query_processing.main([None, '--file', scrypt_file])
         output = mock.getvalue()
         correct = 'g1.txt\nempty.txt\ng2.txt\n'
-        self.assertEqual(correct, output)
+        self.assertEqual(sorted(list(filter(lambda s: s != '', correct.split('\n')))),
+                         sorted(list(filter(lambda s: s != '', output.split('\n')))))
 
     def test_named_pattern_without_regex(self):
         with tempfile.TemporaryDirectory() as tmpdir:
