@@ -1,5 +1,6 @@
 import sys
 import os
+import random
 from antlr4 import *
 
 from gen.query_languages.graph_query_grammarListener import graph_query_grammarParser
@@ -87,9 +88,20 @@ class queryVisitor(graph_query_grammarVisitor):
         return ctx.Nt_name().getText()
 
     def visitSelect_stmt(self, ctx: graph_query_grammarParser.Select_stmtContext):
+        s_acceptable, graph_vertices_amount = self.get_s_acceptable(ctx)
+        vs_info = ctx.obj_expr().vs_info()[0].Ident()
+        from_expr = ctx.where_expr().v_expr()[0]
+        to_expr = ctx.where_expr().v_expr()[1]
+        try:
+            if ctx.obj_expr().Kw_exists() is not None:
+                return self.process_exists(vs_info, from_expr, to_expr, s_acceptable, graph_vertices_amount)
+        except BadScriptException as e:
+            raise e
+
+    def get_s_acceptable(self, ctx: graph_query_grammarParser.Select_stmtContext):
         graph_file = ctx.String().getText()[1:-1]
         gf = open(graph_file, 'r')
-        graph_triples = gf.read().splitlines()
+        graph_triples = gf.readlines()
         gf.close()
         graph = Graph(graph_triples)
         pattern = self.visitPattern(ctx.where_expr().pattern())
@@ -102,14 +114,38 @@ class queryVisitor(graph_query_grammarVisitor):
                                     for triple in hellings(grammar, graph)
                                     ]
                                    ))
-        vs_info = ctx.obj_expr().vs_info()[0].Ident()
-        from_expr = ctx.where_expr().v_expr()[0]
-        to_expr = ctx.where_expr().v_expr()[1]
-        if ctx.obj_expr().Kw_exists() is not None:
-            if len(vs_info) == 2:
-                if not (is_ident(from_expr) and is_ident(to_expr)):
-                    raise BadScriptException('Condition on fix variable')
+        return s_acceptable, len(graph.vertices)
+
+    @staticmethod
+    def process_exists(vs_info, from_expr, to_expr, s_acceptable, graph_vertices_amount):
+        if len(vs_info) == 2:
+            if not (is_ident(from_expr) and is_ident(to_expr)):
+                raise BadScriptException('Condition on fix variable')
+            return len(s_acceptable) > 0
+        # if one variable
+        v_name = vs_info[0].getText()
+        if is_ident(from_expr):
+            if is_ident(to_expr):
+                raise BadScriptException('Unknown variable')
+            if from_expr.Ident().getText() != v_name:
+                raise BadScriptException('Unknown from variable')
+            if to_expr.Underscore() is not None:
                 return len(s_acceptable) > 0
+            if to_expr.Kw_id() is not None:
+                return int(to_expr.Int().getText()) in [snd for fst, snd in s_acceptable]
+            if to_expr.Kw_random() is not None:
+                v = random.randint(0, graph_vertices_amount - 1)
+                return v in [snd for fst, snd in s_acceptable]
+        # to_expr equals v
+        if to_expr.Ident().getText() != v_name:
+            raise BadScriptException('Unknown variable')
+        if from_expr.Underscore() is not None:
+            return len(s_acceptable) > 0
+        if from_expr.Kw_id() is not None:
+            return int(from_expr.Int().getText()) in [fst for fst, snd in s_acceptable]
+        if from_expr.Kw_random() is not None:
+            v = random.randint(0, graph_vertices_amount - 1)
+            return v in [fst for fst, snd in s_acceptable]
 
 
 def main(argv):
