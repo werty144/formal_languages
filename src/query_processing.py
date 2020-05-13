@@ -89,7 +89,7 @@ class queryVisitor(graph_query_grammarVisitor):
 
     def visitSelect_stmt(self, ctx: graph_query_grammarParser.Select_stmtContext):
         s_acceptable, graph_vertices_amount = self.get_s_acceptable(ctx)
-        vs_info = ctx.obj_expr().vs_info()[0].Ident()
+        vs_info = ctx.obj_expr().vs_info(0).Ident()
         from_expr = ctx.where_expr().v_expr()[0]
         to_expr = ctx.where_expr().v_expr()[1]
         try:
