@@ -47,12 +47,15 @@ def get_visitor(scrypt_file):
     return visitor
 
 
-def prepare_test(scrypt_lines_lambda):
+def prepare_test(scrypt_lines_lambda, function_to_run=None, args=None):
     with tempfile.TemporaryDirectory() as tmpdir:
         graph_dir = make_graph_folder(tmpdir)
         scrypt_dir = tmpdir
         scrypt_lines = scrypt_lines_lambda(graph_dir)
         scrypt_file = make_scrypt_file(scrypt_dir, scrypt_lines)
+        if function_to_run is not None:
+            function_to_run(args(graph_dir, scrypt_file))
+            return
         visitor = get_visitor(scrypt_file)
         return visitor, graph_dir
 
@@ -65,12 +68,10 @@ class QueryProcessingTest(unittest.TestCase):
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_list_in_main(self, mock):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            graph_dir = make_graph_folder(tmpdir)
-            scrypt_dir = tmpdir
-            scrypt_lines = [f'CONNECT TO [{graph_dir}];', 'LIST ALL GRAPHS;']
-            scrypt_file = make_scrypt_file(scrypt_dir, scrypt_lines)
-            src.query_processing.main([None, '--file', scrypt_file])
+        prepare_test(lambda g_dir: [f'CONNECT TO [{g_dir}];', 'LIST ALL GRAPHS;'],
+                     src.query_processing.main,
+                     lambda g_dir, scrypt_file: [None, '--file', scrypt_file]
+                     )
         output = mock.getvalue()
         correct = 'g1.txt\nempty.txt\ng2.txt\n'
         self.assertEqual(sorted(list(filter(lambda s: s != '', correct.split('\n')))),
