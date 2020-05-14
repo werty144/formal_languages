@@ -7,6 +7,7 @@ script
 
 stmt
     : Kw_connect Kw_to String
+    | Kw_list Kw_all Kw_graphs
     | select_stmt
     | named_pattern
     | Kw_write select_stmt Kw_to String
@@ -27,7 +28,7 @@ obj_expr
     | Kw_isolated Lbr vs_info Rbr
     | Kw_count_neighbours Lbr vs_info Rbr
     | Kw_singular Lbr vs_info Rbr
-    | Kw_adjacent Lbr vs_info vs_info Rbr
+    | Kw_adjacent Lbr vs_info Rbr
     ;
 
 vs_info
@@ -43,7 +44,6 @@ v_expr
     : Ident
     | Underscore
     | Ident Dot Kw_id Op_eq Int
-    | Ident Dot Kw_id Op_gr Int
     | Kw_random
     ;
 

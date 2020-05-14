@@ -236,6 +236,9 @@ class CFGrammar:
                 self.start_nonterminal = term.value
             self.add_rule(term.value, self.split_tree(tree.children[1]))
 
+    def add_hard_rule(self, rule):
+        self.split_hard_lines([rule])
+
     def split_tree(self, tree: Tree):
         tree_type = tree.data
         if tree_type == 'expr':
