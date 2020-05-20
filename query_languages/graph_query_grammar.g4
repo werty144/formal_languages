@@ -28,7 +28,7 @@ obj_expr
     | Kw_isolated Lbr vs_info Rbr
     | Kw_count_neighbours Lbr vs_info Rbr
     | Kw_singular Lbr vs_info Rbr
-    | Kw_adjacent Lbr vs_info Rbr
+    | Kw_count_adjacent Lbr vs_info Rbr
     ;
 
 vs_info
@@ -92,7 +92,7 @@ Kw_count: 'COUNT';
 Kw_count_neighbours: 'COUNT_NEIGHBOURS';
 Kw_isolated: 'ISOLATED';
 Kw_singular: 'SINGULAR';
-Kw_adjacent: 'ADJACENT';
+Kw_count_adjacent: 'COUNT_ADJACENT';
 Kw_exists: 'EXISTS';
 Kw_from: 'FROM';
 Kw_select: 'SELECT';

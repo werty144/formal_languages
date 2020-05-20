@@ -38,6 +38,11 @@ class queryVisitor(graph_query_grammarVisitor):
             self.visitNamed_pattern(ctx.named_pattern())
         if ctx.select_stmt() is not None and ctx.Kw_write() is None:
             print(self.visitSelect_stmt(ctx.select_stmt()))
+        if ctx.select_stmt() is not None and ctx.Kw_write() is not None:
+            out_file = open(ctx.String()[1:-1], 'w')
+            res = self.visitSelect_stmt(ctx.select_stmt())
+            out_file.write(str(res))
+            out_file.close()
 
     def process_connect(self, ctx: graph_query_grammarParser.StmtContext):
         self.cur_graph_dir = ctx.String().getText()[1:-1]
@@ -88,13 +93,31 @@ class queryVisitor(graph_query_grammarVisitor):
         return ctx.Nt_name().getText()
 
     def visitSelect_stmt(self, ctx: graph_query_grammarParser.Select_stmtContext):
-        s_acceptable, graph_vertices_amount = self.get_s_acceptable(ctx)
+        s_acceptable, graph = self.get_s_acceptable(ctx)
         vs_info = ctx.obj_expr().vs_info().Ident()
         from_expr = ctx.where_expr().v_expr()[0]
         to_expr = ctx.where_expr().v_expr()[1]
+        kwargs = {
+            'vs_info': vs_info,
+            'from_expr': from_expr,
+            'to_expr': to_expr,
+            's_acceptable': s_acceptable,
+            'graph_vertices_amount': graph.vertices_amount(),
+            'graph': graph
+        }
         try:
             if ctx.obj_expr().Kw_exists() is not None:
-                return self.process_exists(vs_info, from_expr, to_expr, s_acceptable, graph_vertices_amount)
+                return self.process_exists(**kwargs)
+            if ctx.obj_expr().Kw_count() is not None:
+                return self.process_count(**kwargs)
+            if ctx.obj_expr().Kw_isolated() is not None:
+                return self.process_isolated(**kwargs)
+            if ctx.obj_expr().Kw_count_neighbours() is not None:
+                return self.process_count_neighbours(**kwargs)
+            if ctx.obj_expr().Kw_singular is not None:
+                return self.process_singular(**kwargs)
+            if ctx.obj_expr().Kw_count_adjacent is not None:
+                return self.process_count_adjacent(**kwargs)
         except BadScriptException as e:
             raise e
 
@@ -114,14 +137,23 @@ class queryVisitor(graph_query_grammarVisitor):
                                     for triple in hellings(grammar, graph)
                                     ]
                                    ))
-        return s_acceptable, len(graph.vertices)
+        return s_acceptable, graph
 
     @staticmethod
-    def process_exists(vs_info, from_expr, to_expr, s_acceptable, graph_vertices_amount):
+    def process_obj_expr_template(
+                                  pair_func,
+                                  single_func,
+                                  **kwargs
+    ):
+        vs_info = kwargs['vs_info']
+        from_expr = kwargs['from_expr']
+        to_expr = kwargs['to_expr']
+        s_acceptable = kwargs['s_acceptable']
+        graph_vertices_amount = kwargs['graph_vertices_amount']
         if len(vs_info) == 2:
             if not (is_ident(from_expr) and is_ident(to_expr)):
                 raise BadScriptException('Condition on fix variable')
-            return len(s_acceptable) > 0
+            return pair_func(s_acceptable)
         # if one variable
         v_name = vs_info[0].getText()
         if is_ident(from_expr):
@@ -130,22 +162,89 @@ class queryVisitor(graph_query_grammarVisitor):
             if from_expr.Ident().getText() != v_name:
                 raise BadScriptException('Unknown from variable')
             if to_expr.Underscore() is not None:
-                return len(s_acceptable) > 0
+                vertices = [fst for fst, snd in s_acceptable]
+                return single_func(vertices)
             if to_expr.Kw_id() is not None:
-                return int(to_expr.Int().getText()) in [snd for fst, snd in s_acceptable]
+                vertices = list(filter(lambda p: p[1] == int(kwargs['to_expr'].Int().getText()), s_acceptable))
+                return single_func(vertices)
             if to_expr.Kw_random() is not None:
-                v = random.randint(0, graph_vertices_amount - 1)
-                return v in [snd for fst, snd in s_acceptable]
+                u = random.randint(0, graph_vertices_amount - 1)
+                vertices = list(filter(lambda p: p[1] == u, kwargs['s_acceptable']))
+                return single_func(vertices)
         # to_expr equals v
         if to_expr.Ident().getText() != v_name:
             raise BadScriptException('Unknown variable')
         if from_expr.Underscore() is not None:
-            return len(s_acceptable) > 0
+            vertices = [snd for fst, snd in s_acceptable]
+            return single_func(vertices)
         if from_expr.Kw_id() is not None:
-            return int(from_expr.Int().getText()) in [fst for fst, snd in s_acceptable]
+            vertices = list(filter(lambda p: p[0] == int(kwargs['from_expr'].Int().getText()), s_acceptable))
+            return single_func(vertices)
         if from_expr.Kw_random() is not None:
-            v = random.randint(0, graph_vertices_amount - 1)
-            return v in [fst for fst, snd in s_acceptable]
+            u = random.randint(0, graph_vertices_amount - 1)
+            vertices = list(filter(lambda p: p[0] == u, kwargs['s_acceptable']))
+            return single_func(vertices)
+
+    def process_exists(self, **kwargs):
+        def pair_func(pairs):
+            return len(pairs) > 0
+
+        def exists(vertices):
+            return len(vertices) > 0
+
+        return self.process_obj_expr_template(pair_func, exists, **kwargs)
+
+    def process_count(self, **kwargs):
+        def pair_func(pairs):
+            return len(pairs)
+
+        def count(vertices):
+            return len(set(vertices))
+
+        return self.process_obj_expr_template(pair_func, count, **kwargs)
+
+    def process_isolated(self, **kwargs):
+        def pair_func(pairs):
+            raise BadScriptException('Isolated expr is not for pairs!')
+
+        def isolated(vertices):
+            import itertools
+            graph = kwargs['graph']
+            for u, v in itertools.product(vertices):
+                if graph.connected(u, v):
+                    return False
+            return True
+
+        return self.process_obj_expr_template(pair_func, isolated, **kwargs)
+    
+    def process_count_neighbours(self, **kwargs):
+        def pair_func(pairs):
+            raise BadScriptException('Count neighbours is not for pairs!')
+
+        def count_neighbors(vertices):
+            graph = kwargs['graph']
+            return len(set([item for sublist in [graph.get_neighbours(v) for v in vertices] for item in sublist]))
+
+        return self.process_obj_expr_template(pair_func, count_neighbors, **kwargs)
+
+    def process_singular(self, **kwargs):
+        def pair_func(pairs):
+            return len(pairs) == 1
+
+        def singular(vertices):
+            return len(vertices) == 1
+
+        return self.process_obj_expr_template(pair_func, singular, **kwargs)
+
+    def process_count_adjacent(self, **kwargs):
+        def pair_func(pairs):
+            graph = kwargs['graph']
+            return len(list(filter(lambda p: graph.adjacent(p[0], p[1]), pairs)))
+
+        def count_adjacent(vertices):
+            raise BadScriptException('Count adjacent is not for single vertex!')
+
+        return self.process_obj_expr_template(pair_func, count_adjacent, **kwargs)
 
 
 def main(argv):
