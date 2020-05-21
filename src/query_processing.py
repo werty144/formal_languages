@@ -39,7 +39,7 @@ class queryVisitor(graph_query_grammarVisitor):
         if ctx.select_stmt() is not None and ctx.Kw_write() is None:
             print(self.visitSelect_stmt(ctx.select_stmt()))
         if ctx.select_stmt() is not None and ctx.Kw_write() is not None:
-            out_file = open(ctx.String()[1:-1], 'w')
+            out_file = open(ctx.String().getText()[1:-1], 'w')
             res = self.visitSelect_stmt(ctx.select_stmt())
             out_file.write(str(res))
             out_file.close()
@@ -114,9 +114,9 @@ class queryVisitor(graph_query_grammarVisitor):
                 return self.process_isolated(**kwargs)
             if ctx.obj_expr().Kw_count_neighbours() is not None:
                 return self.process_count_neighbours(**kwargs)
-            if ctx.obj_expr().Kw_singular is not None:
+            if ctx.obj_expr().Kw_singular() is not None:
                 return self.process_singular(**kwargs)
-            if ctx.obj_expr().Kw_count_adjacent is not None:
+            if ctx.obj_expr().Kw_count_adjacent() is not None:
                 return self.process_count_adjacent(**kwargs)
         except BadScriptException as e:
             raise e
@@ -165,11 +165,13 @@ class queryVisitor(graph_query_grammarVisitor):
                 vertices = [fst for fst, snd in s_acceptable]
                 return single_func(vertices)
             if to_expr.Kw_id() is not None:
-                vertices = list(filter(lambda p: p[1] == int(kwargs['to_expr'].Int().getText()), s_acceptable))
+                vertices = [fst for fst, snd in
+                            filter(lambda p: p[1] == int(to_expr.Int().getText()), s_acceptable)]
                 return single_func(vertices)
             if to_expr.Kw_random() is not None:
                 u = random.randint(0, graph_vertices_amount - 1)
-                vertices = list(filter(lambda p: p[1] == u, kwargs['s_acceptable']))
+                vertices = [fst for fst, snd in
+                            filter(lambda p: p[1] == u, s_acceptable)]
                 return single_func(vertices)
         # to_expr equals v
         if to_expr.Ident().getText() != v_name:
@@ -178,11 +180,13 @@ class queryVisitor(graph_query_grammarVisitor):
             vertices = [snd for fst, snd in s_acceptable]
             return single_func(vertices)
         if from_expr.Kw_id() is not None:
-            vertices = list(filter(lambda p: p[0] == int(kwargs['from_expr'].Int().getText()), s_acceptable))
+            vertices = [snd for (fst, snd) in
+                        filter(lambda p: p[0] == int(from_expr.Int().getText()), s_acceptable)]
             return single_func(vertices)
         if from_expr.Kw_random() is not None:
             u = random.randint(0, graph_vertices_amount - 1)
-            vertices = list(filter(lambda p: p[0] == u, kwargs['s_acceptable']))
+            vertices = [snd for fst, snd in
+                        list(filter(lambda p: p[0] == u, s_acceptable))]
             return single_func(vertices)
 
     def process_exists(self, **kwargs):
@@ -210,7 +214,7 @@ class queryVisitor(graph_query_grammarVisitor):
         def isolated(vertices):
             import itertools
             graph = kwargs['graph']
-            for u, v in itertools.product(vertices):
+            for u, v in itertools.product(vertices, vertices):
                 if graph.connected(u, v):
                     return False
             return True
