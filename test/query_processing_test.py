@@ -382,6 +382,61 @@ class QueryProcessingTest(unittest.TestCase):
         correct = 'False\n'
         self.assertEqual(correct, mock.getvalue())
 
+    def test_select_count_adjacent_unit_to_id(self):
+        with self.assertRaises(src.query_processing.BadScriptException) as bs:
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                          'SELECT COUNT_ADJACENT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (v.ID = 1);']
+                         )
+        self.assertEqual('Count adjacent is not for single vertex!', bs.exception.message)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_to_underscore(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | c;\n',
+                      'SELECT COUNT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (_);']
+                     )
+        correct = '0\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_to_random(self, mock):
+        total = 0
+        for _ in range(100):
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b | a b;\n',
+                          'SELECT COUNT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (RANDOM);']
+                         )
+            last_mock = list(filter(lambda s: s != '', mock.getvalue().split('\n')))[-1]
+            total += int(last_mock)
+        self.assertGreater(total, 100)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_from_underscore(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (_) - S -> (v);']
+                     )
+        correct = '1\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_from_random(self, mock):
+        total = 0
+        for _ in range(100):
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b | a b;\n',
+                          'SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (RANDOM) - S -> (v);']
+                         )
+            last_mock = list(filter(lambda s: s != '', mock.getvalue().split('\n')))[-1]
+            total += int(last_mock)
+        self.assertGreater(total, 100)
+
     def test_write(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             out_file = os.path.join(tmpdir, 'out.txt')
