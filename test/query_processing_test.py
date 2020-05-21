@@ -250,6 +250,205 @@ class QueryProcessingTest(unittest.TestCase):
                          )
         self.assertEqual('Unknown variable', bs.exception.message)
 
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_from_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u.ID = 1) - S -> (v);'])
+        correct = '3\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_isolated_unit_from_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT ISOLATED(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u.ID = 1) - S -> (v);'])
+        correct = 'False\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_neighbours_unit_from_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT COUNT_NEIGHBOURS(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u.ID = 1) - S -> (v);'])
+        correct = '3\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_singular_unit_from_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT SINGULAR(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u.ID = 1) - S -> (v);'])
+        correct = 'False\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    def test_select_count_adjacent_unit_from_id(self):
+        with self.assertRaises(src.query_processing.BadScriptException) as bs:
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                          'SELECT COUNT_ADJACENT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u.ID = 1) - S -> (v);'])
+        self.assertEqual('Count adjacent is not for single vertex!', bs.exception.message)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_pair(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT COUNT((u, v)) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v);']
+                     )
+        correct = '9\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    def test_select_isolated_pair(self):
+        with self.assertRaises(src.query_processing.BadScriptException) as bs:
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                          'SELECT ISOLATED((u, v)) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (v);']
+                         )
+        self.assertEqual('Isolated expr is not for pairs!', bs.exception.message)
+
+    def test_select_count_neighbours_pair(self):
+        with self.assertRaises(src.query_processing.BadScriptException) as bs:
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                          'SELECT COUNT_NEIGHBOURS((u, v)) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (v);']
+                         )
+        self.assertEqual('Count neighbours is not for pairs!', bs.exception.message)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_singular_pair(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT SINGULAR((u, v)) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v);']
+                     )
+        correct = 'False\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_adjacent_pair(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                      'SELECT COUNT_ADJACENT((u, v)) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v);']
+                     )
+        correct = '2\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_to_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT COUNT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v.ID = 1);']
+                     )
+        correct = '0\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_isolated_unit_to_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT ISOLATED(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v.ID = 1);']
+                     )
+        correct = 'True\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_neighbours_unit_to_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT COUNT_NEIGHBOURS(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v.ID = 1);']
+                     )
+        correct = '0\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_singular_unit_to_id(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT SINGULAR(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (v.ID = 1);']
+                     )
+        correct = 'False\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    def test_select_count_adjacent_unit_to_id(self):
+        with self.assertRaises(src.query_processing.BadScriptException) as bs:
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                          'SELECT COUNT_ADJACENT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (v.ID = 1);']
+                         )
+        self.assertEqual('Count adjacent is not for single vertex!', bs.exception.message)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_to_underscore(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | c;\n',
+                      'SELECT COUNT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (u) - S -> (_);']
+                     )
+        correct = '0\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_to_random(self, mock):
+        total = 0
+        for _ in range(100):
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b | a b;\n',
+                          'SELECT COUNT(u) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (u) - S -> (RANDOM);']
+                         )
+            last_mock = list(filter(lambda s: s != '', mock.getvalue().split('\n')))[-1]
+            total += int(last_mock)
+        self.assertGreater(total, 100)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_from_underscore(self, mock):
+        prepare_test(lambda g_dir:
+                     [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | a b;\n',
+                      'SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                      'WHERE (_) - S -> (v);']
+                     )
+        correct = '1\n'
+        self.assertEqual(correct, mock.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_select_count_unit_from_random(self, mock):
+        total = 0
+        for _ in range(100):
+            prepare_test(lambda g_dir:
+                         [f'CONNECT TO [{g_dir}];\n', 'S = a S b | a b;\n',
+                          'SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                          'WHERE (RANDOM) - S -> (v);']
+                         )
+            last_mock = list(filter(lambda s: s != '', mock.getvalue().split('\n')))[-1]
+            total += int(last_mock)
+        self.assertGreater(total, 100)
+
+    def test_write(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_file = os.path.join(tmpdir, 'out.txt')
+            _, graph_dir = prepare_test(lambda g_dir:
+                                        [f'CONNECT TO [{g_dir}];\n', 'S = a S b S | eps;\n',
+                                         'WRITE SELECT COUNT(v) FROM' + ' [' + os.path.join(g_dir, 'g1.txt]') + ' ' +
+                                         f'WHERE (u.ID = 1) - S -> (v) TO [{out_file}];']
+                                        )
+            out_file = open(out_file, 'r')
+            self.assertEqual('3', out_file.read())
+            out_file.close()
+
 
 if __name__ == '__main__':
     unittest.main()

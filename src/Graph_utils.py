@@ -14,3 +14,12 @@ class Graph:
 
     def vertices_amount(self):
         return len(self.vertices)
+
+    def connected(self, u, v):
+        return (u, v) in [(u, v) for u, _, v in self.edges]
+
+    def get_neighbours(self, v):
+        return [u for _, _, u in filter(lambda tr: tr[0] == v, self.edges)]
+
+    def adjacent(self, u, v):
+        return v in self.get_neighbours(u)
